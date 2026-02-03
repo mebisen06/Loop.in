@@ -1,3 +1,6 @@
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+
 interface ProfileDropdownProps {
     isOpen: boolean;
     onClose: () => void;
@@ -6,6 +9,8 @@ interface ProfileDropdownProps {
     userEmail: string;
 }
 
+
+
 export default function ProfileDropdown({
     isOpen,
     onClose,
@@ -13,6 +18,8 @@ export default function ProfileDropdown({
     userName,
     userEmail,
 }: ProfileDropdownProps) {
+    const router = useRouter();
+    const { logout } = useAuth();
     if (!isOpen) return null;
 
     return (
@@ -68,7 +75,7 @@ export default function ProfileDropdown({
                     <button
                         className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
                         onClick={() => {
-                            // Handle logout
+                            logout();
                             onClose();
                         }}
                     >

@@ -25,7 +25,12 @@ class Post(PostBase):
     created_at: datetime
     author_id: Optional[int] = None
     author: Optional[UserBasic] = None
-
-
+    
+    # Vote info
+    upvotes: int = 0
+    downvotes: int = 0
+    comments_count: int = 0
+    user_vote: Optional[int] = None # 1, -1, or None (if not voted)
+    
     class Config:
         from_attributes = True

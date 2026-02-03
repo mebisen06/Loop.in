@@ -11,6 +11,11 @@ class Post(Base):
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
+    # Vote Counts (Cached)
+    upvotes = Column(Integer, default=0)
+    downvotes = Column(Integer, default=0)
+    comments_count = Column(Integer, default=0)
+    
     # Author (optional for now, can be linked to User if we enforce auth)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     author = relationship("User", backref="posts")

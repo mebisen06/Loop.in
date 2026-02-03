@@ -8,9 +8,10 @@ import FloatingSort, { SortOption } from './FloatingSort';
 interface CommentSectionProps {
     postId: number;
     initialCount?: number;
+    currentUserId?: number | null;
 }
 
-export default function CommentSection({ postId, initialCount = 0 }: CommentSectionProps) {
+export default function CommentSection({ postId, initialCount = 0, currentUserId }: CommentSectionProps) {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const [comments, setComments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -129,6 +130,7 @@ export default function CommentSection({ postId, initialCount = 0 }: CommentSect
                                         key={comment.id}
                                         comment={comment}
                                         postId={postId}
+                                        currentUserId={currentUserId}
                                         onReplySuccess={fetchComments}
                                     />
                                 ))}

@@ -57,8 +57,12 @@ export const createComment = async (postId: number, content: string, parentId?: 
   const response = await api.post(`/posts/${postId}/comments/`, {
     content
   }, {
-    params: { author_id: authorId, parent_id: parentId }
   });
+  return response.data;
+};
+
+export const deleteComment = async (postId: number, commentId: number) => {
+  const response = await api.delete(`/posts/${postId}/comments/${commentId}`);
   return response.data;
 };
 
@@ -87,6 +91,22 @@ export const getCurrentUser = async () => {
   } catch (error) {
     return null; // Not logged in
   }
+};
+
+// Notifications
+export const getNotifications = async (skip = 0, limit = 20) => {
+  const response = await api.get(`/notifications/?skip=${skip}&limit=${limit}`);
+  return response.data;
+};
+
+export const markNotificationRead = async (notificationId: number) => {
+  const response = await api.put(`/notifications/${notificationId}/read`);
+  return response.data;
+};
+
+export const markAllNotificationsRead = async () => {
+  const response = await api.put(`/notifications/read-all`);
+  return response.data;
 };
 
 export default api;

@@ -10,6 +10,10 @@ class Comment(Base):
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
+    # Vote Counts (Cached)
+    upvotes = Column(Integer, default=0)
+    downvotes = Column(Integer, default=0)
+    
     # Relationships
     post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=True)

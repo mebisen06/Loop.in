@@ -1,76 +1,91 @@
 'use client';
 
-import ProfileHeader from '@/components/profile/ProfileHeader';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { getCurrentUser } from '@/lib/api';
+import { User } from '@/types';
+import UserAvatar from '@/components/common/UserAvatar';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
-    // Mock user data (In real app, fetch from /api/me)
-    const mockUser = {
-        name: "John Doe",
-        initials: "JD",
-        email: "john.doe@university.edu",
-        role: "Senior Student",
-        type: 'student' as const,
-        department: "Computer Science",
-        joinDate: "September 2023",
-        isVerified: true
-    };
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        getCurrentUser().then(userData => {
+            if (!userData) {
+                router.push('/login');
+                return;
+            }
+            setUser(userData);
+            setLoading(false);
+        });
+    }, [router]);
+
+    if (loading) return <div className="p-8 text-center text-slate-500">Loading profile...</div>;
+    if (!user) return null;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Header */}
-            <ProfileHeader user={mockUser} />
+        <div className="max-w-4xl mx-auto py-8 px-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-[#1c1c1f] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"
+            >
+                {/* Header/Cover */}
+                <div className="h-32 bg-gradient-to-r from-blue-600 to-purple-600"></div>
 
-            {/* Content Tabs / Body */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left: About / Bio */}
-                <div className="lg:col-span-2 space-y-6">
-                    <section className="bg-white p-6 rounded-xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-slate-100">
-                        <h2 className="text-lg font-bold text-slate-900 mb-4 font-serif">About</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            Senior Computer Science student with a focus on Artificial Intelligence and Systems Architecture.
-                            Currently working on a research paper about distributed systems in academic environments.
-                            Always open to collaboration on open-source projects.
-                        </p>
+                <div className="px-8 pb-8">
+                    <div className="relative flex justify-between items-end -mt-12 mb-6">
+                        <UserAvatar
+                            user={user}
+                            size="xl"
+                            className="border-4 border-white dark:border-[#1c1c1f] shadow-lg"
+                        />
+                        <button
+                            className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-slate-50 transition-colors"
+                            onClick={() => router.push('/profile/edit')}
+                        >
+                            Edit Profile
+                        </button>
+                    </div>
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                            {['React', 'Python', 'System Design', 'UI/UX'].map(skill => (
-                                <span key={skill} className="px-3 py-1 bg-slate-50 text-slate-600 text-xs font-semibold rounded-md border border-slate-200">
-                                    {skill}
+                    <div className="space-y-4">
+                        <div>
+                            <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                                {user.username || 'No Username'}
+                                <span className="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    {user.role}
                                 </span>
-                            ))}
+                            </h1>
+                            <p className="text-slate-500 font-medium">{user.full_name || user.email}</p>
                         </div>
-                    </section>
 
-                    {/* Recent Activity Placeholder */}
-                    <section className="bg-white p-6 rounded-xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-slate-100 min-h-[200px] flex items-center justify-center text-slate-400">
-                        <div className="text-center">
-                            <p className="text-sm font-medium">Recent Activity</p>
-                            <p className="text-xs mt-1">No recent posts to show</p>
+                        <div className="flex gap-6 text-sm">
+                            <div className="flex flex-col">
+                                <span className="font-bold text-slate-900 dark:text-white">Enrollment</span>
+                                <span className="text-slate-600 dark:text-slate-400">{user.enrollment_number || 'N/A'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-bold text-slate-900 dark:text-white">Department</span>
+                                <span className="text-slate-600 dark:text-slate-400">{user.department || 'General'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-bold text-slate-900 dark:text-white">Joined</span>
+                                <span className="text-slate-600 dark:text-slate-400">{new Date(user.created_at || Date.now()).toLocaleDateString()}</span>
+                            </div>
                         </div>
-                    </section>
-                </div>
 
-                {/* Right: Sidebar Info */}
-                <div className="space-y-6">
-                    <section className="bg-white p-6 rounded-xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-slate-100">
-                        <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Academics</h3>
-                        <ul className="space-y-4">
-                            <li className="flex justify-between items-center text-sm">
-                                <span className="text-slate-600">Major</span>
-                                <span className="font-medium text-slate-900">Computer Science</span>
-                            </li>
-                            <li className="flex justify-between items-center text-sm">
-                                <span className="text-slate-600">Year</span>
-                                <span className="font-medium text-slate-900">Senior (4th)</span>
-                            </li>
-                            <li className="flex justify-between items-center text-sm">
-                                <span className="text-slate-600">GPA</span>
-                                <span className="font-medium text-slate-900">3.8/4.0</span>
-                            </li>
-                        </ul>
-                    </section>
+                        <div>
+                            <h3 className="font-bold text-slate-900 dark:text-white mb-2">About</h3>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                                {user.bio || "No bio yet."}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

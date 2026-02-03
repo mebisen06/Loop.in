@@ -96,7 +96,13 @@ def health_check():
 
 # Include API routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-from app.api import posts, comments, reactions
+from app.api import posts, comments, reactions, users, votes
+
+app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(posts.router, prefix="/posts", tags=["posts"])
 app.include_router(comments.router, prefix="/posts/{post_id}/comments", tags=["comments"])
 app.include_router(reactions.router, prefix="/reactions", tags=["reactions"])
+app.include_router(votes.router, prefix="/votes", tags=["votes"])
+# Notifications
+from app.api import notifications
+app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])

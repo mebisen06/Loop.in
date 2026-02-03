@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getNotifications, markNotificationRead, markAllNotificationsRead, getCurrentUser } from '@/lib/api'; // Check path
 
 type NotificationType = 'academic' | 'social' | 'system';
 
@@ -58,8 +59,88 @@ const MOCK_NOTIFICATIONS: Notification[] = [
 export default function NotificationDropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'all' | 'academic' | 'social'>('all');
-    const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Fetch initial notifications
+    const fetchNotifications = async () => {
+        try {
+            const data = await getNotifications();
+            // Map backend data to frontend model if necessary, or use as is if matches
+            // Backend sends: id, type, title, message, created_at, is_read, sender...
+            // Frontend expects: id, type, title, description, time, isRead...
+
+            const mapped = data.map((n: any) => ({
+                id: n.id,
+                type: n.type === 'comment' || n.type === 'upvote' ? 'social' : 'academic', // Map types
+                title: n.title,
+                description: n.message,
+                time: new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), // Simple time for now
+                isRead: n.is_read,
+                sender: n.sender,
+                raw_created_at: n.created_at // Keep for sorting/timeago
+            }));
+            setNotifications(mapped);
+        } catch (error) {
+            console.error("Failed to fetch notifications", error);
+        }
+    };
+
+    // WebSocket Connection
+    useEffect(() => {
+        // Fetch history first
+        fetchNotifications();
+
+        // Connect WS
+        // We need the user ID for the WS channel. 
+        // For now, we assume we can get it from localStorage or an API call if not in context.
+        // ideally useAuth() should provide ID.
+        // Let's assume we can fetch it or it's in a token. 
+
+        let ws: WebSocket | null = null;
+
+        const connectWs = async () => {
+            try {
+                const user = await getCurrentUser();
+                if (!user) return;
+
+                const wsUrl = `ws://localhost:8000/notifications/ws/${user.id}`; // Make env var in prod
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    console.log("WS Connected");
+                };
+
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    // Handle new notification
+                    const newNotif = {
+                        id: Date.now(), // Temp ID until refresh
+                        type: data.type === 'comment' || data.type === 'upvote' ? 'social' : 'academic',
+                        title: data.title,
+                        description: data.message,
+                        time: 'Just now',
+                        isRead: false,
+                        sender: data.sender,
+                        raw_created_at: new Date().toISOString()
+                    };
+
+                    setNotifications(prev => [newNotif as Notification, ...prev]);
+                };
+
+                ws.onerror = (e) => console.error("WS Error", e);
+            } catch (e) {
+                console.error("Setup error", e);
+            }
+        };
+
+        connectWs();
+
+        return () => {
+            if (ws) ws.close();
+        };
+    }, []);
 
     // Close on click outside
     useEffect(() => {
@@ -76,15 +157,30 @@ export default function NotificationDropdown() {
 
     const filteredNotifications = notifications.filter(n => {
         if (activeTab === 'all') return true;
-        return n.type === activeTab;
+        // Map backend types to tabs
+        if (activeTab === 'academic' && (n.type as any) === 'academic') return true; // announcement -> academic
+        if (activeTab === 'social' && (n.type as any) === 'social') return true;
+        return false;
     });
 
-    const markAllAsRead = () => {
+    const markAllAsRead = async () => {
+        // Optimistic
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        await markAllNotificationsRead();
     };
 
-    const handleNotificationClick = (id: number) => {
+    const handleNotificationClick = async (id: number) => {
+        // Optimistic
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+        try {
+            // If local fake ID, careful. But usually we click real ones.
+            // If it's a temp ID from WS, backend won't find it.
+            // Ideally we should refetch entire list on WS message to get real ID, OR assume marked read on backend later?
+            // specific markRead might fail if ID is fake.
+            if (id < 1000000000000) { // Simple check for likely real DB ID
+                await markNotificationRead(id);
+            }
+        } catch (e) { }
     };
 
     return (
@@ -166,19 +262,30 @@ export default function NotificationDropdown() {
                                             `}
                                         >
                                             <div className="flex gap-3 items-start">
-                                                {/* Icon */}
+                                                {/* Icon or Avatar */}
                                                 <div className={`
-                                                    mt-1 p-2 rounded-full shrink-0
-                                                    ${notification.type === 'academic' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}
+                                                    mt-1 rounded-full shrink-0 overflow-hidden
+                                                    ${notification.type === 'academic' ? 'bg-red-100 text-red-600 p-2' : 'bg-blue-100 text-blue-600'}
+                                                    ${(notification as any).sender ? 'w-9 h-9 border border-white shadow-sm p-0' : 'p-2'}
                                                 `}>
-                                                    {notification.type === 'academic' ? (
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                        </svg>
+                                                    {(notification as any).sender ? (
+                                                        (notification as any).sender.profile_photo ? (
+                                                            <img src={(notification as any).sender.profile_photo} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center font-bold text-xs bg-blue-500 text-white">
+                                                                {(notification as any).sender.name?.[0] || 'U'}
+                                                            </div>
+                                                        )
                                                     ) : (
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                                        </svg>
+                                                        notification.type === 'academic' ? (
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                                            </svg>
+                                                        )
                                                     )}
                                                 </div>
 
