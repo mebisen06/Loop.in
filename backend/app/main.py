@@ -70,7 +70,12 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict in production
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ],  # TODO: Restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -91,3 +96,7 @@ def health_check():
 
 # Include API routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
+from app.api import posts, comments, reactions
+app.include_router(posts.router, prefix="/posts", tags=["posts"])
+app.include_router(comments.router, prefix="/posts/{post_id}/comments", tags=["comments"])
+app.include_router(reactions.router, prefix="/reactions", tags=["reactions"])

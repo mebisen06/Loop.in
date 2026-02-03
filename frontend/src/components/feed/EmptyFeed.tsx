@@ -1,14 +1,14 @@
-import EmptyState from '@/components/common/EmptyState';
-
 /**
- * Empty state specifically for the feed when there are no posts
+ * EmptyFeed component removed - use EmptyState directly instead:
+ * 
+ * import EmptyState from '@/components/common/EmptyState';
+ * 
+ * <EmptyState
+ *   title="No posts yet"
+ *   description="Be the first to start a discussion in your campus community"
+ * />
  */
+
 export default function EmptyFeed() {
-    return (
-        <EmptyState
-            icon="📭"
-            title="No posts yet"
-            description="Be the first to start a discussion in your campus community"
-        />
-    );
+    return null;
 }

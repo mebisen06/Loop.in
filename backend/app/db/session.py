@@ -56,6 +56,9 @@ def create_tables() -> None:
     """
     # Import models here to register them with Base
     from app.models import user  # noqa: F401
+    from app.models import post  # noqa: F401
+    from app.models import comment  # noqa: F401
+    from app.models import reaction  # noqa: F401
     
     # Create all tables
     Base.metadata.create_all(bind=engine)

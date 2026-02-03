@@ -38,8 +38,8 @@ function CategoryPill({
     return (
         <span
             className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-colors ${active
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-blue-100 text-blue-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
         >
             {children}

@@ -1,0 +1,89 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+
+interface DeveloperCardProps {
+    name: string;
+    role: string;
+    imageSrc: string;
+    githubUrl: string;
+    linkedinUrl: string;
+}
+
+export default function DeveloperCard({ name, role, imageSrc, githubUrl, linkedinUrl }: DeveloperCardProps) {
+    return (
+        <motion.div
+            className="group relative w-full h-[420px] bg-slate-200 rounded-3xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-500"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            whileHover={{
+                y: -10,
+                rotateY: 5,
+                rotateX: -2,
+            }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            style={{ perspective: 1000 }}
+        >
+            {/* Animated Gradient Border Layer (Visible on Hover via inset) */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+            {/* Main Content Container (Inset to create border effect) */}
+            <div className="absolute inset-[2px] bg-white rounded-[22px] overflow-hidden z-10 flex flex-col">
+
+                {/* Image Section - Full Height with Gradient Overlay */}
+                <div className="relative h-full w-full overflow-hidden">
+                    <Image
+                        src={imageSrc}
+                        alt={name}
+                        fill
+                        className="object-cover transition-all duration-700 ease-out group-hover:scale-110 grayscale group-hover:grayscale-0"
+                        priority
+                    />
+
+                    {/* Dark Overlay for Text Contrast */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/40 to-transparent opacity-90 transition-opacity duration-300" />
+                </div>
+
+                {/* Text Content - Positioned at Bottom */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 z-20 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out">
+                    <div className="overflow-hidden">
+                        <h3 className="text-2xl font-bold text-white mb-1 transform translate-y-0 transition-transform">
+                            {name}
+                        </h3>
+                        <p className="text-sm font-bold text-blue-400 uppercase tracking-widest mb-4">
+                            {role}
+                        </p>
+                    </div>
+
+                    {/* Social Links - Slide Up Fade In */}
+                    <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100 transform translate-y-4 group-hover:translate-y-0 pb-2">
+                        <a
+                            href={githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2.5 bg-white/10 backdrop-blur-md text-white rounded-xl hover:bg-white hover:text-slate-900 transition-all duration-300 border border-white/20 hover:border-white shadow-lg"
+                            title="GitHub"
+                        >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                            </svg>
+                        </a>
+                        <a
+                            href={linkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2.5 bg-blue-600/80 backdrop-blur-md text-white rounded-xl hover:bg-blue-600 transition-all duration-300 border border-blue-500/30 hover:border-blue-400 shadow-lg"
+                            title="LinkedIn"
+                        >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+}

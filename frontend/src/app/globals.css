@@ -1,8 +1,23 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAFAF7;
+  --foreground: #0f172a;
+
+  /* Department Brands */
+  --dept-cs: #0d9488;
+  /* Teal-600 */
+  --dept-ee: #d97706;
+  /* Amber-600 */
+  --dept-me: #3b82f6;
+  /* Blue-500 */
+  --dept-ce: #be123c;
+  /* Rose-700 */
+  --dept-it: #7e22ce;
+  /* Purple-700 */
+  --dept-general: #64748b;
+  /* Slate-500 */
 }
 
 @theme inline {
@@ -10,17 +25,135 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Expose to Tailwind */
+  --color-dept-cs: var(--dept-cs);
+  --color-dept-ee: var(--dept-ee);
+  --color-dept-me: var(--dept-me);
+  --color-dept-ce: var(--dept-ce);
+  --color-dept-it: var(--dept-it);
+  --color-dept-general: var(--dept-general);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* DARK MODE */
+    --background: #09090b;
+    --foreground: #FAFAF7;
+
+    --card: #1c1c1f;
+    /* Slightly lighter than bg */
+    --card-foreground: #FAFAF7;
+
+    --popover: #1c1c1f;
+    --popover-foreground: #FAFAF7;
+
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+
+    --secondary: #27272a;
+    --secondary-foreground: #FAFAF7;
+
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+
+    --accent: #27272a;
+    --accent-foreground: #FAFAF7;
+
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fafafa;
+
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #1d4ed8;
   }
 }
 
+.dark {
+  /* DARK MODE */
+  --background: #09090b;
+  --foreground: #FAFAF7;
+
+  --card: #1c1c1f;
+  /* Slightly lighter than bg */
+  --card-foreground: #FAFAF7;
+
+  --popover: #1c1c1f;
+  --popover-foreground: #FAFAF7;
+
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+
+  --secondary: #27272a;
+  --secondary-foreground: #FAFAF7;
+
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+
+  --accent: #27272a;
+  --accent-foreground: #FAFAF7;
+
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #1d4ed8;
+}
+
+* {
+  border-color: var(--border);
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom Animation Utilities (mimicking tailwindcss-animate) */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation-duration: 150ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+.slide-in-from-bottom-4 {
+  animation-name: slideInFromBottom;
+}
+
+.duration-200 {
+  animation-duration: 200ms;
+}
+
+/* Scrollbar hiding for sidebar when body locked */
+body.sidebar-open {
+  overflow: hidden;
 }
