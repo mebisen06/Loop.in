@@ -26,6 +26,7 @@ export interface Post {
     department: string;
     type: string;
     tags?: string;
+    is_anonymous?: boolean;
     created_at: string;
     author_id?: number;
     author?: User;

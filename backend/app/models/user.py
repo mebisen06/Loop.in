@@ -7,9 +7,10 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    hashed_password = Column(String, nullable=True)  # Nullable for OAuth users
     is_active = Column(Boolean, default=True)
     enrollment_number = Column(String, unique=True, index=True, nullable=True) # Nullable for legacy, enforced in API
+    auth_provider = Column(String, default="local")  # "local" or "google"
     
     # Profile Fields
     username = Column(String, unique=True, index=True, nullable=True) # Enforce uniqueness in API

@@ -10,6 +10,7 @@ class PostBase(BaseModel):
     department: str
     type: str = "discussion"
     tags: Optional[str] = None
+    is_anonymous: bool = False
 
 class PostCreate(PostBase):
     pass

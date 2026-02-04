@@ -19,6 +19,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
     const [content, setContent] = useState('');
     const [department, setDepartment] = useState('');
     const [tags, setTags] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const isFormValid = title.trim().length > 0 &&
@@ -43,7 +44,8 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
                 content,
                 department,
                 type: postType,
-                tags
+                tags,
+                is_anonymous: isAnonymous
             });
 
             showToast("Post created successfully!", "success");
@@ -53,6 +55,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
             setContent('');
             setDepartment('');
             setTags('');
+            setIsAnonymous(false);
             onClose();
         } catch (error: any) {
             console.error("Failed to create post", error);
@@ -112,6 +115,40 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
 
                     {/* Content */}
                     <div className="p-6 space-y-6">
+                        {/* Identity Toggle */}
+                        <div className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isAnonymous ? 'bg-slate-800 text-white' : 'bg-blue-100 text-blue-600'}`}>
+                                    {isAnonymous ? (
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-800">
+                                        {isAnonymous ? 'Ghost Mode' : 'Posting as Yourself'}
+                                    </p>
+                                    <p className="text-xs text-slate-500">
+                                        {isAnonymous ? 'Your name and details will be hidden.' : 'Your profile will be visible to everyone.'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsAnonymous(!isAnonymous)}
+                                disabled={isSubmitting}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isAnonymous ? 'bg-slate-700' : 'bg-blue-600'}`}
+                            >
+                                <span
+                                    className={`${isAnonymous ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                />
+                            </button>
+                        </div>
+
                         {/* Post Type */}
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -191,7 +228,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
                                     Provide enough context for others to understand and respond
                                 </p>
                                 <span className={`text-xs font-medium ${content.length > MAX_CONTENT_LENGTH ? 'text-red-600' :
-                                        content.length > MAX_CONTENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-slate-400'
+                                    content.length > MAX_CONTENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-slate-400'
                                     }`}>
                                     {content.length}/{MAX_CONTENT_LENGTH}
                                 </span>

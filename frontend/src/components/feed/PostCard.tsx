@@ -15,36 +15,77 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, currentUserId, onDelete }: PostCardProps) {
-    const isAuthor = currentUserId && post.author_id === currentUserId;
+    // Department Color Map
+    const deptColors: Record<string, string> = {
+        'CS': '0, 255, 255', // Cyan
+        'EE': '255, 165, 0', // Orange
+        'ME': '59, 130, 246', // Blue
+        'CE': '225, 29, 72', // Rose
+        'IT': '147, 51, 234', // Purple
+        'GENERAL': '148, 163, 184' // Slate
+    };
+    const deptColor = deptColors[post.department || 'GENERAL'] || deptColors['GENERAL'];
 
-    // Use Author data if available, fallback to legacy fields
-    const authorName = post.author?.full_name || post.author?.email?.split('@')[0] || 'Anonymous Student';
-    const authorRole = post.author?.role || 'Student';
+    const isAuthor = currentUserId && post.author_id === currentUserId;
+    const isAnonymous = post.is_anonymous;
+    const authorName = isAnonymous ? 'Anonymous Student' : (post.author?.full_name || post.author?.email?.split('@')[0] || 'Student');
+    const authorUsername = isAnonymous ? '' : (post.author?.username || '');
+    const authorRole = isAnonymous ? 'Ghost' : (post.author?.role || 'Student');
     const timeAgo = new Date(post.created_at).toLocaleDateString();
 
     return (
         <motion.article
             layout
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="bg-white dark:bg-[#1c1c1f] p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 group relative border border-slate-100 dark:border-slate-800"
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            whileHover={{ y: -6, scale: 1.01 }}
+            transition={{ type: "spring", stiffness: 100, damping: 15 }}
+            className="relative bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-white/40 dark:border-white/5 transition-all duration-300 group"
+            style={{
+                boxShadow: `0 0 0 1px rgba(255,255,255,0.1), 0 8px 30px -6px rgba(0,0,0,0.1)`
+            }}
         >
-            <div className="flex justify-between items-start mb-5">
+            {/* Dynamic Glow Element - visible on hover */}
+            <div
+                className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                style={{
+                    boxShadow: `0 20px 40px -10px rgba(${deptColor}, 0.15), 0 0 20px -5px rgba(${deptColor}, 0.1)`
+                }}
+            />
+
+            <div className="relative z-10 flex justify-between items-start mb-5">
                 {/* Author Info */}
                 <div className="flex items-center gap-3">
-                    <UserAvatar user={post.author} size="md" />
+                    {/* Avatar with Ghost Mode blur effect */}
+                    <div className={`relative ${isAnonymous ? 'filter blur-[1px] opacity-60' : ''}`}>
+                        {isAnonymous ? (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-400 dark:from-slate-700 dark:to-slate-900 flex items-center justify-center border border-slate-300 dark:border-slate-600 backdrop-blur-sm shadow-inner">
+                                <svg className="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                        ) : (
+                            <UserAvatar user={post.author} size="md" />
+                        )}
+                        {/* Spectral glow for ghost mode */}
+                        {isAnonymous && (
+                            <div className="absolute inset-0 rounded-full bg-slate-400/20 dark:bg-slate-600/20 animate-pulse pointer-events-none" />
+                        )}
+                    </div>
 
                     <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                            {authorName}
+                        <div className="flex items-center flex-wrap gap-2 text-sm font-bold text-slate-900 dark:text-white tracking-tight">
+                            <span>{authorName}</span>
+                            {authorUsername && (
+                                <span className="text-slate-500 dark:text-slate-400 font-medium opacity-80">@{authorUsername}</span>
+                            )}
                             <DepartmentBadge deptCode={post.department || 'GENERAL'} />
-                            <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                            <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                 {authorRole}
                             </span>
                         </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide mt-0.5">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide mt-0.5 ml-0.5">
                             {post.author?.enrollment_number || 'Student'} • {timeAgo}
                         </div>
                     </div>
@@ -55,7 +96,7 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
                     <div className="relative">
                         <button
                             onClick={() => onDelete(post.id)}
-                            className="p-2 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50/50 dark:hover:bg-red-900/20 rounded-full transition-all opacity-0 group-hover:opacity-100"
                             title="Delete Post"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,9 +108,9 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
             </div>
 
             {/* Post Content */}
-            <div className="mb-6">
+            <div className="mb-6 relative z-10">
                 <Link href={`/posts/${post.id}`} className="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 leading-tight tracking-tight">
+                    <h2 className="text-2xl font-serif font-black text-slate-900 dark:text-white mb-3 leading-tight tracking-tight drop-shadow-sm">
                         <TruncatedText text={post.title} maxLength={60} />
                     </h2>
                 </Link>
@@ -80,11 +121,11 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
 
             {/* Tags */}
             {post.tags && (
-                <div className="flex items-center gap-2 mb-6 flex-wrap">
+                <div className="flex items-center gap-2 mb-6 flex-wrap relative z-10">
                     {post.tags.split(',').filter(t => t.trim()).map((tag: string) => (
                         <span
                             key={tag}
-                            className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border border-slate-200 dark:border-slate-700 uppercase"
+                            className="bg-slate-50/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full text-xs font-bold tracking-wide border border-slate-200/60 dark:border-slate-700/60 uppercase backdrop-blur-sm"
                         >
                             {tag}
                         </span>
@@ -93,7 +134,7 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
             )}
 
             {/* Actions */}
-            <div className="pt-6 flex flex-col gap-3">
+            <div className="pt-6 mt-2 border-t border-slate-100/60 dark:border-white/5 relative z-10">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <VoteControl
@@ -102,16 +143,9 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
                             initialUserVote={post.user_vote}
                             postId={post.id}
                         />
-
-                        {/* Legacy Reactions (kept as requested) */}
-                        {/* <ReactionPicker ... /> can be here if needed, or maybe Voting replaced it? 
-                            User requirement: "Add Voting System WITHOUT removing current post features."
-                            So I should keep ReactionPicker if it existed.
-                            Looking at page.tsx, ReactionPicker was there.
-                        */}
                     </div>
 
-                    <button className="flex items-center gap-1.5 text-sm font-medium hover:text-blue-700 transition-colors text-slate-500">
+                    <button className="flex items-center gap-1.5 text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-slate-500">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                         </svg>
@@ -119,7 +153,9 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
                     </button>
                 </div>
 
-                <CommentSection postId={post.id} initialCount={post.comments_count || 0} currentUserId={currentUserId} />
+                <div className="mt-4">
+                    <CommentSection postId={post.id} initialCount={post.comments_count || 0} currentUserId={currentUserId} />
+                </div>
             </div>
         </motion.article>
     );

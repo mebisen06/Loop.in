@@ -1,19 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from datetime import datetime
+from starlette.background import BackgroundTasks
 
 from app.db.session import get_db
 from app.schemas.comment import Comment, CommentCreate
 from app.crud.comment import create_comment, get_comments_by_post
 from app.api.deps import get_current_user
 from app.models.user import User
+from app.models.post import Post
+from app.models.notification import Notification
+from app.models.comment import Comment as CommentModel
+from app.core.socket_manager import manager
 
 router = APIRouter()
-
-from starlette.background import BackgroundTasks
-from app.core.socket_manager import manager
-from datetime import datetime
-from app.models.notification import Notification
 
 async def send_notification_ws(user_id: int, message: dict):
     await manager.send_personal_message(message, user_id)
@@ -36,11 +37,6 @@ async def create_comment_endpoint(
     )
     
     # Increment comment count
-    from app.models.post import Post
-    from app.models.notification import Notification
-    from datetime import datetime
-    from app.core.socket_manager import manager
-    
     post = db.query(Post).filter(Post.id == post_id).first()
     if post:
         post.comments_count += 1
@@ -88,9 +84,6 @@ def delete_comment_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    from app.models.post import Post
-    from app.models.comment import Comment as CommentModel
-    
     comment = db.query(CommentModel).filter(CommentModel.id == comment_id, CommentModel.post_id == post_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")

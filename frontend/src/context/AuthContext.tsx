@@ -53,7 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = () => {
         localStorage.removeItem('token');
         setUser(null);
-        router.push('/login');
+        // Force full refresh to clear any in-memory state
+        window.location.href = '/login';
     };
 
     const refreshUser = async () => {

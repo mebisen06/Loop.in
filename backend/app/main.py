@@ -70,12 +70,8 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-    ],  # TODO: Restrict in production
+    allow_origins=[],
+    allow_origin_regex='.*',
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -103,6 +99,21 @@ app.include_router(posts.router, prefix="/posts", tags=["posts"])
 app.include_router(comments.router, prefix="/posts/{post_id}/comments", tags=["comments"])
 app.include_router(reactions.router, prefix="/reactions", tags=["reactions"])
 app.include_router(votes.router, prefix="/votes", tags=["votes"])
+
+from fastapi import WebSocket, WebSocketDisconnect
+from app.core.socket_manager import manager
+
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await manager.connect(websocket, client_id)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, client_id)
+
 # Notifications
-from app.api import notifications
+# Notifications
+from app.api import notifications, news
 app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+app.include_router(news.router, prefix="/news", tags=["news"])

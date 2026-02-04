@@ -77,7 +77,7 @@ export default function VoteControl({
     const netVotes = upvotes - downvotes;
 
     return (
-        <div className={`flex items-center bg-slate-50 rounded-lg overflow-hidden border border-slate-200 ${size === 'sm' ? 'h-7' : 'h-9'}`}>
+        <div className={`flex items-center bg-slate-100 dark:bg-slate-900/50 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 ${size === 'sm' ? 'h-7' : 'h-9'}`}>
             <button
                 onClick={() => handleVote(1)}
                 disabled={loading}
@@ -90,7 +90,7 @@ export default function VoteControl({
             </button>
 
             <span className={`px-1 text-sm font-bold min-w-[20px] text-center ${userVote === 1 ? 'text-orange-600' :
-                    userVote === -1 ? 'text-blue-600' : 'text-slate-700'
+                userVote === -1 ? 'text-blue-600' : 'text-slate-700'
                 }`}>
                 {netVotes}
             </span>

@@ -173,7 +173,7 @@ export default function RootLayout({
                 {/* Sidebar */}
                 <aside
                   className={`
-              w-[240px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col
+              w-[240px] bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col
               fixed md:static inset-y-0 left-0 z-50
               transform transition-transform duration-300 cubic-bezier(0.25, 0.8, 0.25, 1)
               ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
@@ -262,8 +262,8 @@ export default function RootLayout({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       }
-                      badge="2 Due"
-                      badgeColor="bg-red-50 text-red-600 border border-red-100"
+                      badge="3 Due"
+                      badgeColor="bg-red-100 text-red-700 border border-red-200 animate-pulse"
                       isActive={pathname === '/deadlines'}
                       onClick={() => setIsSidebarOpen(false)}
                     />
@@ -286,8 +286,8 @@ export default function RootLayout({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                       }
-                      badge="New"
-                      badgeColor="bg-emerald-50 text-emerald-600 border border-emerald-100"
+                      badge="Now"
+                      badgeColor="bg-emerald-100 text-emerald-700 border border-emerald-200"
                       isActive={pathname === '/career'}
                       onClick={() => setIsSidebarOpen(false)}
                     />
@@ -315,13 +315,16 @@ export default function RootLayout({
 
                       <Link
                         href="/developers"
-                        className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium transition-colors"
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group/team"
                         onClick={() => setIsSidebarOpen(false)}
                       >
-                        <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                        <span>Developed by Team</span>
+                        <span className="relative flex items-center justify-center">
+                          <span className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping opacity-50 group-hover/team:opacity-100" />
+                          <svg className="w-[18px] h-[18px] relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                          </svg>
+                        </span>
+                        <span className="group-hover/team:translate-x-0.5 transition-transform">Developed by Team</span>
                       </Link>
                     </div>
                   </nav>

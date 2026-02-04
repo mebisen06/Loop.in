@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getNotifications, markNotificationRead, markAllNotificationsRead, getCurrentUser } from '@/lib/api'; // Check path
+import { useAuth } from '@/context/AuthContext';
 
 type NotificationType = 'academic' | 'social' | 'system';
 
@@ -60,11 +61,12 @@ export default function NotificationDropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'all' | 'academic' | 'social'>('all');
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { user } = useAuth();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Fetch initial notifications
     const fetchNotifications = async () => {
+        if (!user) return;
         try {
             const data = await getNotifications();
             // Map backend data to frontend model if necessary, or use as is if matches
@@ -89,22 +91,17 @@ export default function NotificationDropdown() {
 
     // WebSocket Connection
     useEffect(() => {
+        if (!user) return;
+
         // Fetch history first
         fetchNotifications();
 
         // Connect WS
-        // We need the user ID for the WS channel. 
-        // For now, we assume we can get it from localStorage or an API call if not in context.
-        // ideally useAuth() should provide ID.
-        // Let's assume we can fetch it or it's in a token. 
-
         let ws: WebSocket | null = null;
 
         const connectWs = async () => {
             try {
-                const user = await getCurrentUser();
-                if (!user) return;
-
+                // Use user from context instead of refetching
                 const wsUrl = `ws://localhost:8000/notifications/ws/${user.id}`; // Make env var in prod
                 ws = new WebSocket(wsUrl);
 
@@ -140,7 +137,7 @@ export default function NotificationDropdown() {
         return () => {
             if (ws) ws.close();
         };
-    }, []);
+    }, [user]); // Re-run when user changes
 
     // Close on click outside
     useEffect(() => {

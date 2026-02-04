@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.comment import Comment
 from app.schemas.comment import CommentCreate
 from app.crud.reaction import get_reaction_counts
@@ -17,7 +17,7 @@ def create_comment(db: Session, comment: CommentCreate, post_id: int, author_id:
 
 def get_comments_by_post(db: Session, post_id: int, user_id: int = None):
     # Get all comments for post
-    comments = db.query(Comment).filter(Comment.post_id == post_id).order_by(Comment.created_at).all()
+    comments = db.query(Comment).options(joinedload(Comment.author)).filter(Comment.post_id == post_id).order_by(Comment.created_at).all()
     
     # We want to return a nested structure, but Pydantic models are flat or recursive.
     # Let's populate reactions first.
