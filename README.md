@@ -8,9 +8,9 @@ A verified college community platform built for students to discuss coursework, 
 
 ## Project Status
 
-**Status:** 🟢 Active Development (Day 2 Completed)  
-**Current Phase:** UX & Professional Polish  
-**Last Updated:** February 2, 2026
+**Status:** 🟢 Active Development (Day 4 Completed)  
+**Current Phase:** Temporal Pinning & Bug Fixes  
+**Last Updated:** February 5, 2026
 
 ---
 
@@ -134,6 +134,55 @@ Loop.in is a college-specific social platform designed for verified students to 
 - Professional, human-made feel
 
 ---
+
+### Day 3 – Firebase Auth & Admin System ✅ (Completed)
+
+**Authentication Migration:**
+- Migrated from custom auth to Firebase Authentication
+- Google Sign-In integration for seamless login
+- Email/Password authentication support
+- Lazy user registration (auto-creates user on first login)
+- Token verification on backend with Firebase Admin SDK
+
+**Admin Panel & RBAC:**
+- Role-based access control (admin/student roles)
+- Local JWT authentication for admin users
+- Admin dashboard with user management
+- Audit logging for admin actions (delete, pin)
+- Protected admin routes with role verification
+
+---
+
+### Day 4 – Temporal Pinning & Bug Fixes ✅ (Completed - Feb 5, 2026)
+
+**Temporal Pinning Feature:**
+- Admins can pin posts with time-based expiration
+- Duration options: 24 hours, 7 days, 30 days, or Infinite
+- `pinned_until` column added to Post model
+- Automatic sorting: pinned (not expired) posts appear first
+- Visual indicators: spectral glow border on pinned posts
+- Timer badge showing time remaining (visible to admins)
+- PinDialog component for duration selection
+
+**Backend Improvements:**
+- `pin_post` endpoint with duration parameter (`24h`, `7d`, `30d`, `infinite`)
+- Temporal sorting logic using SQLAlchemy `case()` expressions
+- Audit logging for `PIN_POST` action
+- Added `firebase-admin` dependency
+- Fixed CORS configuration for development
+
+**Frontend Improvements:**
+- Pin button on PostCard (admin only)
+- PinDialog with animated duration selector
+- Spectral border animation for pinned posts
+- Expiration countdown badge
+- Created missing `spotlight.tsx` component for SplineBanner
+
+**Critical Bug Fixes:**
+- Fixed missing `content` field in `PostCreate` schema (was causing createPost to fail)
+- Fixed admin page infinite loading state
+- Fixed 401 interceptor conflict with admin routes
+- Removed sensitive credentials from git history
 
 ## Tech Stack
 
@@ -391,9 +440,9 @@ npm run dev
 | Day | Focus Area | Status |
 |-----|-----------|--------|
 | **Day 1** | Foundation & Auth | ✅ Complete |
-| **Day 2** | Posts & Comments | 🔄 In Progress |
-| **Day 3** | Differentiation Features | ⏳ Planned |
-| **Day 4** | Search & Polish | ⏳ Planned |
+| **Day 2** | UX & Professional Polish | ✅ Complete |
+| **Day 3** | Firebase Auth & Admin System | ✅ Complete |
+| **Day 4** | Temporal Pinning & Bug Fixes | ✅ Complete |
 | **Day 5** | Testing & Deployment | ⏳ Planned |
 
 ### Day 1 Achievements (Completed Feb 1, 2026)
