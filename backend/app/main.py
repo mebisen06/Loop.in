@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     
     try:
         # Initialize database
-        init_db(settings.DATABASE_URL)
+        init_db(settings.SQLALCHEMY_DATABASE_URL)
         logger.info("Database engine initialized")
         
         # Create tables
@@ -68,11 +68,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware - Allow all origins for development
+# CORS middleware - Allow production frontend or all in development
+origins = [
+    settings.FRONTEND_URL,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=origins if settings.FRONTEND_URL != "http://localhost:3000" else ["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],

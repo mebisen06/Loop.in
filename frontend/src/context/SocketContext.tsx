@@ -30,7 +30,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         // Avoid multiple connections
         if (socket?.readyState === WebSocket.OPEN) return;
 
-        const wsUrl = `ws://localhost:8000/notifications/ws/${user.id}`;
+        const wsBaseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL || 'ws://localhost:8000';
+        const wsUrl = `${wsBaseUrl}/notifications/ws/${user.id}`;
         const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {

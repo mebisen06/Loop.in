@@ -22,12 +22,14 @@ if not firebase_admin._apps:
         if os.path.exists(cred_path):
             cred = credentials.Certificate(cred_path)
         else:
-            # Try parsing as JSON string
+            # Try parsing as JSON string (handle potential escaped quotes and whitespace)
             try:
-                cred_dict = json.loads(cred_path)
+                # Clean the string if it was wrapped in extra quotes by env vars
+                cleaned_path = cred_path.strip().strip("'").strip('"')
+                cred_dict = json.loads(cleaned_path)
                 cred = credentials.Certificate(cred_dict)
-            except Exception:
-                print("WARNING: FIREBASE_CREDENTIALS_JSON is neither a valid file path nor a JSON string.")
+            except Exception as e:
+                print(f"WARNING: FIREBASE_CREDENTIALS_JSON is neither a valid file path nor a valid JSON string. Error: {e}")
                 cred = None
         
         if cred:
