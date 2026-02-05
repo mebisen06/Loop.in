@@ -36,11 +36,17 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     logger.info("Starting application...")
-    logger.info(f"Database URL: {settings.DATABASE_URL.split('@')[1]}")  # Don't log password
+    
+    db_url = settings.SQLALCHEMY_DATABASE_URL
+    if "@" in db_url:
+        host = db_url.split("@")[1].split("/")[0]
+        logger.info(f"Connecting to database host: {host}")
+    else:
+        logger.info("Connecting to database: (URL format not masked)")
     
     try:
         # Initialize database
-        init_db(settings.SQLALCHEMY_DATABASE_URL)
+        init_db(db_url)
         logger.info("Database engine initialized")
         
         # Create tables

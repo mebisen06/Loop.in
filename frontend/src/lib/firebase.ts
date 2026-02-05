@@ -21,16 +21,31 @@ if (typeof window !== 'undefined') {
 }
 
 // Initialize Firebase (Singleton pattern)
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+let app;
+let auth: any;
+let googleProvider: any;
 
-// Configure auth persistence to LOCAL (survives page reloads and browser restarts)
-if (typeof window !== 'undefined') {
-    setPersistence(auth, browserLocalPersistence).catch((error) => {
-        console.error("Failed to set auth persistence:", error);
-    });
+if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "undefined") {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+
+    // Configure auth persistence to LOCAL (survives page reloads and browser restarts)
+    if (typeof window !== 'undefined') {
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.error("Failed to set auth persistence:", error);
+        });
+    }
+} else {
+    // During build/prerendering on Vercel, env vars might be missing.
+    // We provide dummy objects to prevent the build from crashing.
+    console.warn("Firebase config is incomplete. Firebase features will be disabled until environment variables are set.");
+    app = {} as any;
+    auth = {
+        onAuthStateChanged: () => () => { },
+        signOut: async () => { },
+    } as any;
+    googleProvider = {} as any;
 }
-
-const googleProvider = new GoogleAuthProvider();
 
 export { app, auth, googleProvider };

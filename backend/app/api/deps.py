@@ -26,14 +26,22 @@ if not firebase_admin._apps:
             try:
                 # Clean the string if it was wrapped in extra quotes by env vars
                 cleaned_path = cred_path.strip().strip("'").strip('"')
-                cred_dict = json.loads(cleaned_path)
-                cred = credentials.Certificate(cred_dict)
+                if not cleaned_path:
+                    print("WARNING: FIREBASE_CREDENTIALS_JSON is empty.")
+                    cred = None
+                else:
+                    cred_dict = json.loads(cleaned_path)
+                    cred = credentials.Certificate(cred_dict)
             except Exception as e:
-                print(f"WARNING: FIREBASE_CREDENTIALS_JSON is neither a valid file path nor a valid JSON string. Error: {e}")
+                print(f"WARNING: FIREBASE_CREDENTIALS_JSON is invalid. Error: {e}")
                 cred = None
         
         if cred:
-            firebase_admin.initialize_app(cred)
+            try:
+                firebase_admin.initialize_app(cred)
+                print("Firebase Admin successfully initialized.")
+            except Exception as e:
+                print(f"ERROR: Failed to initialize Firebase app: {e}")
     else:
         print("WARNING: FIREBASE_CREDENTIALS_JSON not set. Firebase Auth verification will fail.")
 
